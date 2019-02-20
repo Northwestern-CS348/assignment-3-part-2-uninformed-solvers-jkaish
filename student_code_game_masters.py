@@ -34,7 +34,19 @@ class TowerOfHanoiGame(GameMaster):
             A Tuple of Tuples that represent the game state
         """
         ### student code goes here
-        pass
+        ret = [[],[],[]]
+        asks = [parse_input('fact: (on ?x peg1)'), parse_input('fact: (on ?x peg2)'), parse_input('fact: (on ?x peg3)')]
+        for ii, a in enumerate(asks):
+            bindings = self.kb.kb_ask(a)
+            if bindings:
+                for b in bindings:
+                    disk = b.bindings[0].constant.element[-1]
+                    ret[ii].append(int(disk))
+            ret[ii].sort()
+
+        ret = tuple([tuple(x) for x in ret])
+        return ret
+
 
     def makeMove(self, movable_statement):
         """
@@ -53,7 +65,35 @@ class TowerOfHanoiGame(GameMaster):
             None
         """
         ### Student code goes here
-        pass
+        terms = movable_statement.terms
+        disk = terms[0].term.element
+        from_peg = terms[1].term.element
+        to_peg = terms[2].term.element
+
+        to_retract = []
+        to_retract.append(parse_input('fact: (on {} {}'.format(disk, from_peg)))
+        to_retract.append(parse_input('fact: (top {} {}'.format(disk, from_peg)))
+
+        to_assert = []
+        to_assert.append(parse_input('fact: (on {} {}'.format(disk, to_peg)))
+        to_assert.append(parse_input('fact: (top {} {}'.format(disk, to_peg)))
+
+        to_peg_empty = parse_input('fact: (empty {})'.format(to_peg))
+        if self.kb.kb_ask(to_peg_empty):
+            to_retract.append(to_peg_empty)
+            to_assert.append(parse_input('fact: (bottom {} {}'.format(disk, to_peg)))
+
+        from_peg_empty = parse_input('fact: (bottom {} {})'.format(disk, from_peg))
+        if not self.kb.kb_ask(from_peg_empty):
+            to_retract.append(from_peg_empty)
+            to_assert.append(parse_input('fact: (empty {})'.format(from_peg)))
+
+        for tr in to_retract:
+            self.kb.kb_retract(tr)
+
+        for ta in to_assert:
+            self.kb.kb_assert(ta)
+            
 
     def reverseMove(self, movable_statement):
         """
