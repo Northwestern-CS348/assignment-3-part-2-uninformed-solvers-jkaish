@@ -108,3 +108,5 @@ venv.bak/
 
 # OS X artifact
 .DS_Store
+
+.vscode/

@@ -36,6 +36,8 @@ fact: (larger disk2 disk1)
 fact: (larger disk3 disk2)
 
 fact: (bottom disk3 peg1)
+fact: (under disk2 disk1)
+fact: (under disk3 disk2)
 
 rule: ((larger ?x ?y)) -> (smaller ?y ?x)
 rule: ((larger ?x ?y) (larger ?y ?z)) -> (larger ?x ?z)

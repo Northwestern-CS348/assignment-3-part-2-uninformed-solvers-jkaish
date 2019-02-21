@@ -82,11 +82,23 @@ class TowerOfHanoiGame(GameMaster):
         if self.kb.kb_ask(to_peg_empty):
             to_retract.append(to_peg_empty)
             to_assert.append(parse_input('fact: (bottom {} {}'.format(disk, to_peg)))
+        else:
+            old_top = parse_input('fact: (top ?x {})'.format(to_peg))
+            res = self.kb.kb_ask(old_top)
+            c = res[0].bindings[0].constant.element
+            to_assert.append(parse_input('fact: (under {} {})'.format(c, disk)))
+            to_retract.append(parse_input('fact: (top {} {})'.format(c, to_peg)))
 
         from_peg_empty = parse_input('fact: (bottom {} {})'.format(disk, from_peg))
-        if not self.kb.kb_ask(from_peg_empty):
+        if self.kb.kb_ask(from_peg_empty):
             to_retract.append(from_peg_empty)
             to_assert.append(parse_input('fact: (empty {})'.format(from_peg)))
+        else:
+            new_top = parse_input('fact: (under ?x {})'.format(disk))
+            bindings = self.kb.kb_ask(new_top)
+            c = bindings[0].bindings[0].constant.element
+            to_assert.append(parse_input('fact: (top {} {})'.format(c, from_peg)))
+            to_retract.append(parse_input('fact: (under {} {})'.format(c, disk)))
 
         for tr in to_retract:
             self.kb.kb_retract(tr)
