@@ -20,6 +20,9 @@ class SolverDFS(UninformedSolver):
             True if the desired solution state is reached, False otherwise
         """
         ### Student code goes here
+        if self.currentState.state == self.victoryCondition:
+            return True
+
         curr_gs = self.currentState
         if not curr_gs.children:
             for m in self.gm.getMovables():
@@ -44,9 +47,6 @@ class SolverDFS(UninformedSolver):
                 self.currentState = next_state
                 found_next_step = True
 
-        if self.currentState.state == self.victoryCondition:
-            return True
-
         if not found_next_step:
             self.gm.reverseMove(self.currentState.requiredMovable)
             self.currentState = curr_gs.parent
@@ -54,28 +54,28 @@ class SolverDFS(UninformedSolver):
         return False
 
 
-class Queue():
-    def __init__(self):
-        self.queue = []
-
-    def enqueue(self, item):
-        self.queue.append(item)
-
-    def dequeue(self):
-        return self.queue.pop(0)
-
-    def peek(self):
-        return self.queue[0]
-
-    def empty(self):
-        return len(self.queue) == 0
-
 
 class SolverBFS(UninformedSolver):
 
+    class Queue():
+        def __init__(self):
+            self.queue = []
+
+        def enqueue(self, item):
+            self.queue.append(item)
+
+        def dequeue(self):
+            return self.queue.pop(0)
+
+        def peek(self):
+            return self.queue[0]
+
+        def empty(self):
+            return len(self.queue) == 0
+
     def __init__(self, gameMaster, victoryCondition):
         super().__init__(gameMaster, victoryCondition)
-        self.queue = Queue()
+        self.queue = SolverBFS.Queue()
 
     def solveOneStep(self):
         """
@@ -91,6 +91,9 @@ class SolverBFS(UninformedSolver):
             True if the desired solution state is reached, False otherwise
         """
         ### Student code goes here
+        if self.currentState.state == self.victoryCondition:
+            return True
+
         curr_gs = self.currentState
 
         for m in self.gm.getMovables():
