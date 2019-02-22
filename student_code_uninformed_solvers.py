@@ -47,6 +47,9 @@ class SolverDFS(UninformedSolver):
                 self.currentState = next_state
                 found_next_step = True
 
+        if self.currentState.state == self.victoryCondition:
+            return True
+
         if not found_next_step:
             self.gm.reverseMove(self.currentState.requiredMovable)
             self.currentState = curr_gs.parent
