@@ -9,7 +9,7 @@ required = [
 ]
 th.setWinningCondition(required, 'hanoi_all_forbidden.txt')
 
-solver = SolverDFS(th, ((), (), (1,2,3)))
+solver = SolverBFS(th, ((), (), (1,2,3)))
 
 # p8 = Puzzle8Game()
 # p8.read('puzzle8_top_right_empty.txt')
