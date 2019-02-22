@@ -122,6 +122,22 @@ class TowerOfHanoiGame(GameMaster):
         newList = [pred, sl[0], sl[2], sl[1]]
         self.makeMove(Statement(newList))
 
+
+    def createFutureGameState(self, curr_state, movable_statement):
+        terms = movable_statement.terms
+        disk = int(terms[0].term.element[-1])
+        from_peg = int(terms[1].term.element[-1]) - 1
+        to_peg = int(terms[2].term.element[-1]) - 1
+
+        temp = [list(x) for x in curr_state]
+
+        temp[from_peg].remove(disk)
+        temp[to_peg].append(disk)
+        temp[to_peg].sort()
+
+        return tuple([tuple(x) for x in temp])
+
+
 class Puzzle8Game(GameMaster):
 
     def __init__(self):
@@ -152,7 +168,20 @@ class Puzzle8Game(GameMaster):
             A Tuple of Tuples that represent the game state
         """
         ### Student code goes here
-        pass
+        ret = [[], [], []]
+        loc_queries = ['fact: (locatedat ?x {} pos1)', 'fact: (locatedat ?x {} pos2', 'fact: (locatedat ?x {} pos3)']
+        x_pos = ['pos1', 'pos2', 'pos3']
+
+        for ii, lq in enumerate(loc_queries):
+            for x in x_pos:
+                temp = lq.format(x)
+                q = parse_input(temp)
+                resp = self.kb.kb_ask(q)
+                tile = resp[0].bindings[0].constant.element
+                ret[ii].append(int(tile[-1]) if tile != 'empty' else -1)
+
+        ret = tuple([tuple(x) for x in ret])
+        return ret
 
     def makeMove(self, movable_statement):
         """
@@ -171,7 +200,27 @@ class Puzzle8Game(GameMaster):
             None
         """
         ### Student code goes here
-        pass
+        terms = movable_statement.terms
+        tile = terms[0]
+        old_x = terms[1]
+        old_y = terms[2]
+        new_x = terms[3]
+        new_y = terms[4]
+
+        to_assert = []
+        to_assert.append(parse_input('fact: (locatedat {} {} {})'.format(tile, new_x, new_y)))
+        to_assert.append(parse_input('fact: (locatedat empty {} {})'.format(old_x, old_y)))
+
+        to_retract = []
+        to_retract.append(parse_input('fact: (locatedat {} {} {})'.format(tile, old_x, old_y)))
+        to_retract.append(parse_input('fact: (locatedat empty {} {})'.format(new_x, new_y)))
+
+        for tr in to_retract:
+            self.kb.kb_retract(tr)
+
+        for ta in to_assert:
+            self.kb.kb_assert(ta)
+        
 
     def reverseMove(self, movable_statement):
         """
@@ -187,3 +236,18 @@ class Puzzle8Game(GameMaster):
         sl = movable_statement.terms
         newList = [pred, sl[0], sl[3], sl[4], sl[1], sl[2]]
         self.makeMove(Statement(newList))
+
+    def createFutureGameState(self, curr_state, movable_statement):
+        terms = movable_statement.terms
+        tile = int(terms[0].term.element[-1])
+        old_x = int(terms[1].term.element[-1]) - 1
+        old_y = int(terms[2].term.element[-1]) - 1
+        new_x = int(terms[3].term.element[-1]) - 1
+        new_y = int(terms[4].term.element[-1]) - 1
+
+        temp = [list(x) for x in curr_state]
+        temp[new_y][new_x] = tile
+        temp[old_y][old_x] = -1
+
+        return tuple([tuple(x) for x in temp])
+
